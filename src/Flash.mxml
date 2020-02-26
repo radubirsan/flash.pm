@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" width="1000" height="1000"
+					   xmlns:s="library://ns.adobe.com/flex/spark" backgroundColor="0xcccccc"
+					   xmlns:mx="library://ns.adobe.com/flex/mx" creationComplete="windowedapplication1_creationCompleteHandler(event)" >
+	<fx:Script>
+		<![CDATA[
+			
+			
+			import flash.desktop.NativeApplication;
+			import flash.display.Loader;
+			import flash.display.MovieClip;
+			import flash.display.SWFVersion;
+			import flash.display.Sprite;
+			import flash.display.StageAlign;
+			import flash.events.ErrorEvent;
+			import flash.events.Event;
+			import flash.events.IOErrorEvent;
+			import flash.events.InvokeEvent;
+			import flash.events.MouseEvent;
+			import flash.events.SecurityErrorEvent;
+			import flash.filesystem.File;
+			import flash.filesystem.FileMode;
+			import flash.filesystem.FileStream;
+			import flash.geom.ColorTransform;
+			import flash.html.HTMLLoader;
+			import flash.html.HTMLSWFCapability;
+			import flash.media.SoundMixer;
+			import flash.media.SoundTransform;
+			import flash.net.URLRequest;
+			import flash.net.URLStream;
+			import flash.text.TextField;
+			import flash.utils.ByteArray;
+			import flash.utils.Endian;
+			
+			import mx.events.FlexEvent;
+	
+	
+			
+			[SWF(width="1280", height="1280", backgroundColor="#000000", frameRate="120")]
+			
+			public var getSWF = new TextField()
+			
+			public var arg = new TextField()
+			
+			public var html:HTMLLoader = new HTMLLoader();
+			
+			public var stream:URLStream = new URLStream();
+			
+			
+			public var scaleToFill: Boolean = true;
+			
+			protected function windowedapplication1_creationCompleteHandler(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				var stage = this.nativeWindow.stage;
+				
+				// constructor code
+				this.nativeWindow.stage.addChild(getSWF);
+				this.nativeWindow.stage.addChild(arg);
+				trace("SftCapability", HTMLLoader.swfCapability, HTMLSWFCapability.STATUS_OK)
+				
+				stage.scaleMode = 'noScale'
+				stage.align = StageAlign.TOP_LEFT;
+				stage.addEventListener(Event.RESIZE, onResize);
+				//myHtmlLoader.window.document.childNodes[0].innerHTML
+				NativeApplication.nativeApplication.addEventListener(InvokeEvent.INVOKE, onInvokeEvent);
+				getSWF.visible = false;
+				arg.visible = false
+				stage.addEventListener(MouseEvent.RIGHT_CLICK, showStats)
+				function showStats(e) {
+					//
+					getSWF.visible = true;
+					arg.visible = true
+					stage.addChild(getSWF);
+				}
+				
+				var masker: Sprite = new Sprite()
+				masker.graphics.beginFill(0xffffff, 1);
+				masker.graphics.drawRect(0, 0, 100, 100)
+				masker.graphics.endFill();
+				masker.visible = false;
+				stage.addChild(masker);
+				var arguments: Array;
+				var currentDir: File;
+				
+				// handler for errors
+				function loadError(event: ErrorEvent): void {
+					trace("Error: " + event);
+				}
+				
+				
+				var swfArrdess: String
+				
+				function onInvokeEvent(invocation: InvokeEvent): void {
+					
+					stage.nativeWindow.orderToFront();
+					arguments = invocation.arguments;
+					currentDir = invocation.currentDirectory;
+					
+					if(Capabilities.isDebugger) {
+						swfArrdess = "https://flashgames.bz/files/destruction/Tornado-Button-Smashing.swf"
+						//swfArrdess = "https://flashgames.bz/files/catch,%20throw,%20hit,%20dodge/Wone%20(cool).swf"
+						arguments = [arguments]//,"https://flashgames.bz/files/mario/bouncing-mario.swf"]
+					}
+						
+					else if (String(arguments[0]).indexOf("desktop01") == -1) {
+						getSWF.text += arguments[0]
+						return;
+					}
+					else{
+						getSWF.text += arguments[0]
+						swfArrdess = String(arguments[0]).replace("desktop01:", "");
+					}
+					
+					
+					if (arguments && arguments[0]) {	
+						var file: File = File.desktopDirectory.resolvePath("FlashPM.txt");
+						
+						var fstream: FileStream = new FileStream();
+						fstream.open(file, FileMode.WRITE);
+						fstream.writeUTFBytes(swfArrdess);
+						fstream.close();
+						arg.text = swfArrdess;
+						
+						
+						trace(24332, this.nativeWindow);
+						//	stage.addChild(l);
+						try {
+							html.width = 200;
+							html.height = 300;
+							
+							//	this.nativeWindow.stage.addChild(html);
+							html.load(new URLRequest(swfArrdess));
+							html.addEventListener(Event.COMPLETE, onResize)
+							//l.load(new URLRequest(swfArrdess));
+							stream.load(new URLRequest(swfArrdess));
+							
+						}
+						catch (error: Error) {
+							trace("Error:" + error);
+						}
+					}
+					
+				}
+				
+				function preventClick(e: MouseEvent) {
+					trace("CLICK", e.target, e.currentTarget, e.cancelable)
+					e.preventDefault()
+					e.stopImmediatePropagation()
+					e.stopPropagation()
+				}
+				
+				
+				
+				function onResize(e:Event=null)
+				{
+					if(html && html.loaded) {
+						
+						var scale: int =  1//stage.stageWidth / html.contentWidth;
+						getSWF.text += scale + "\n"
+						var _w: int = html.contentWidth// 300//l.contentLoaderInfo.width
+						var _h: int = html.contentHeight//300//l.contentLoaderInfo.height
+						getSWF.text += "SWF width" + _w + ":" + _h + "Scale:" + scale + "\n"
+						
+						//if(scaleNativeWindow){
+						//stage.nativeWindow.width = _w;
+						//stage.nativeWindow.height = _h;
+						//	stage.scaleMode = StageScaleMode.SHOW_ALL;
+						//}
+						
+						if (scaleToFill) {
+							//_w *= scale;
+							//_h *= scale;
+							//masker.width = _w
+							//	masker.height = _h
+							
+							nativeApplication.activeWindow.stage.addChild(html);
+							
+							html.width = nativeApplication.activeWindow.stage.stageWidth;
+							html.height = nativeApplication.activeWindow.stage.stageHeight;
+							//	l.mask = masker;
+							trace("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$", _w, _h)
+							//l.content.scaleX = scale
+							//	l.content.scaleY = scale;
+							//l.x = stage.stageWidth / scale - _w / scale
+							//	l.y = stage.stageHeight / scale - _h / scale
+							//		masker.x = l.x;
+							//		masker.y = l.y;
+						}
+					}
+					
+				}
+				function loadedSwf(e: Event) {
+					
+					//trace("SWF width", l.content.width, l.content.height);
+					
+					onResize();
+					
+					//l.content.addEventListener(MouseEvent.MOUSE_DOWN, preventClick, true)
+					//	l.addEventListener(MouseEvent.MOUSE_DOWN, preventClick, true)
+					stage.addEventListener(MouseEvent.MOUSE_UP, preventClick, true)
+					stage.addEventListener(MouseEvent.MOUSE_OVER, preventClick, true)
+					
+					
+					
+					var mute: SoundTransform = new SoundTransform(0.0);
+					this.soundTransform = mute;
+					SoundMixer.soundTransform = mute;
+					
+					SoundMixer.stopAll();
+					
+					return
+					stopAllSounds(l.content);
+					//stage.addChild(masker);
+				}
+				
+				function stopAllSounds(sp: * ): void {
+					var mute: SoundTransform = new SoundTransform(0.0);
+					sp.soundTransform = mute;
+					SoundMixer.soundTransform = sp;
+					
+					SoundMixer.stopAll();
+					
+					var mc: * = sp as Object;
+					if (mc != null) {
+						for (var i: int = 0; i < mc.numChildren; ++i) {
+							var m: * = mc.getChildAt(i);
+							//if (m != null) stopAllSounds(m);
+						}
+					}
+				}
+				
+				
+				
+				
+				
+				
+				
+				var req: URLRequest = new URLRequest("https://flashgames.bz/files/mario/bouncing-mario.swf")
+				req.url = "https://flashgames.bz/files/destruction/Tornado-Button-Smashing.swf"
+				req.url = "https://flashgames.bz/files/catch, throw, hit, dodge/Nudge.swf"
+				
+				req.url = "https://flashgames.bz/files/ytv.com/Night_of_the_1000_or_so_zombies_flash_game/Night_of_the_1000_or_so_zombies_flash_game.swf"
+				req.url = "https://flashgames.bz/files/maze%20%F0%9F%8C%80/Logix%20(cool).swf"
+				req.url = "https://flashgames.bz/files/catch, throw, hit, dodge/Two-3.swf"
+				req.url = "https://flashgames.bz/files/mario/super-luigi-bros.swf"
+				
+				stream.addEventListener(Event.COMPLETE, onComplete);
+				
+				//	l.contentLoaderInfo.addEventListener(Event.COMPLETE, loadedSwf)
+				//	stage.addChild(l);
+				
+				trace(NativeApplication.supportsSystemTrayIcon,99)
+				
+				//l.load(req)
+				
+				html.width = stage.stageWidth;
+				html.height = stage.stageHeight;
+				this.nativeWindow.stage.addChild(html);
+				
+				
+				
+				function onComplete(e: Event): void {
+					var bytes: ByteArray = new ByteArray();
+					bytes.endian = Endian.LITTLE_ENDIAN;
+					stream.readBytes(bytes, 0, 8);
+					var sig: String = bytes.readUTFBytes(3);
+					trace("SIG = " + sig);
+					trace("ver = " + bytes.readByte());
+					trace("size = " + bytes.readUnsignedInt());
+					var compBytes: ByteArray = new ByteArray();
+					compBytes.endian = Endian.LITTLE_ENDIAN;
+					stream.readBytes(compBytes);
+					if (sig == "CWS") {
+						compBytes.uncompress();
+					}
+					var fbyte = compBytes.readUnsignedByte();
+					var rect_bitlength = fbyte >> 3;
+					var total_bits = rect_bitlength * 4;
+					var next_bytes = Math.ceil((total_bits - 3) / 8);
+					for (var i = 0; i < next_bytes; i++) {
+						compBytes.readUnsignedByte();
+					}
+					trace("frameRate = " + compBytes.readUnsignedShort());
+					trace("frameCount = " + compBytes.readUnsignedShort());
+					
+					
+					while (true) {
+						var tagcodelen: Number = compBytes.readUnsignedShort();
+						var tagcode: Number = tagcodelen >> 6;
+						var taglen: Number = tagcodelen & 0x3F;
+						trace("tag code = " + tagcode + "\tlen = " + taglen);
+						if (taglen >= 63) {
+							taglen = compBytes.readUnsignedInt();
+						}
+						if (tagcode == 9) {
+							trace("found background color");
+							var r = compBytes.readUnsignedByte();
+							var g = compBytes.readUnsignedByte()
+							var b = compBytes.readUnsignedByte();
+							trace("color is: RED=" + r + ", GREEN = " + g + ", BLUE = " + b);
+							
+							//var hex:uint = r << 16 | g << 8 | b;
+							var ct: ColorTransform = new ColorTransform()
+							ct.redOffset = r;
+							ct.blueOffset = b
+							ct.greenOffset = g;
+							stage.color = ct.color
+							
+							break;
+						}
+						compBytes.readBytes(new ByteArray(), 0, taglen);
+						//break;
+					}
+				}
+			}
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	
+	
+	
+</s:WindowedApplication>
